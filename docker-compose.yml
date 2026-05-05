@@ -1,0 +1,23 @@
+version: "3.1"
+services:
+  go-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    command: CompileDaemon -log-prefix=false -build="make build" -command="./dist/api"
+    volumes:
+      - ./:/app
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - ./.env
+  cron:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    command: CompileDaemon -log-prefix=false -build="make buildcron" -command="/app/dist/cron"
+    env_file: ./.env
+    volumes:
+      - .:/app
