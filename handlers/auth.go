@@ -129,6 +129,56 @@ func Me(g *gin.Context) {
 	g.JSON(http.StatusOK, gin.H{"user": user})
 }
 
+func DeleteAccount(g *gin.Context) {
+	var user models.User
+	if err := config.Cfg.GormDB.First(&user, "id = ?", g.GetString("user_id")).Error; err != nil {
+		g.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+	if !strings.EqualFold(user.Email, strings.TrimSpace(g.GetString("email"))) {
+		g.JSON(http.StatusForbidden, gin.H{"error": "token does not match user account"})
+		return
+	}
+
+	err := config.Cfg.GormDB.Transaction(func(tx *gorm.DB) error {
+		var scheduleIDs []string
+		if err := tx.Unscoped().Model(&models.Schedule{}).
+			Where("user_id = ?", user.ID).
+			Pluck("id", &scheduleIDs).Error; err != nil {
+			return err
+		}
+		if len(scheduleIDs) > 0 {
+			if err := tx.Unscoped().Where("schedule_id IN ?", scheduleIDs).Delete(&models.DayOfWeek{}).Error; err != nil {
+				return err
+			}
+			if err := tx.Unscoped().Where("schedule_id IN ?", scheduleIDs).Delete(&models.DayOfMonth{}).Error; err != nil {
+				return err
+			}
+		}
+		if err := tx.Unscoped().Where("user_id = ?", user.ID).Delete(&models.ReminderLog{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Unscoped().Where("user_id = ?", user.ID).Delete(&models.ManualNote{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Unscoped().Where("user_id = ?", user.ID).Delete(&models.Schedule{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Unscoped().Where("user_id = ?", user.ID).Delete(&models.Medicine{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Unscoped().Where("user_id = ?", user.ID).Delete(&models.Sound{}).Error; err != nil {
+			return err
+		}
+		return tx.Unscoped().Delete(&user).Error
+	})
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": "could not delete account"})
+		return
+	}
+	g.Status(http.StatusNoContent)
+}
+
 func ChangePassword(g *gin.Context) {
 	var req changePasswordRequest
 	if err := g.ShouldBindJSON(&req); err != nil {

@@ -50,6 +50,7 @@ func Router(newRelicApp *newrelic.Application) http.Handler {
 	api.Use(middleware.AuthRequired())
 	{
 		api.GET("/me", handlers.Me)
+		api.DELETE("/me", handlers.DeleteAccount)
 		api.PUT("/me/password", handlers.ChangePassword)
 		api.GET("/subscription/status", handlers.GetSubscriptionStatus)
 		api.POST("/subscription/apple", handlers.UpdateAppleSubscription)
