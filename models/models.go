@@ -29,6 +29,7 @@ type Medicine struct {
 	Notes      string     `gorm:"type:text" json:"notes"`
 	SoundID    *string    `gorm:"type:text" json:"sound_id"`
 	Active     bool       `gorm:"not null;default:true" json:"active"`
+	Color      string     `gorm:"type:text;default:blue" json:"color"`
 	CreatedAt  time.Time  `json:"created_at"`
 	UpdatedAt  time.Time  `json:"updated_at"`
 	DeletedAt  *time.Time `gorm:"index" json:"-"`

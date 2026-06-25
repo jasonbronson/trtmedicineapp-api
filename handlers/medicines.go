@@ -26,6 +26,7 @@ type medicineRequest struct {
 	Notes      string  `json:"notes"`
 	SoundID    *string `json:"sound_id"`
 	Active     *bool   `json:"active"`
+	Color      string  `json:"color"`
 }
 
 type medListFile struct {
@@ -117,6 +118,7 @@ func CreateMedicine(g *gin.Context) {
 		Notes:      req.Notes,
 		SoundID:    req.SoundID,
 		Active:     active,
+		Color:      req.Color,
 	}
 	if err := config.Cfg.GormDB.Create(&medicine).Error; err != nil {
 		apilog.ZapError("create medicine db failed",
@@ -175,6 +177,7 @@ func UpdateMedicine(g *gin.Context) {
 	medicine.DoseUnit = req.DoseUnit
 	medicine.Notes = req.Notes
 	medicine.SoundID = req.SoundID
+	medicine.Color = req.Color
 	if req.Active != nil {
 		medicine.Active = *req.Active
 	}

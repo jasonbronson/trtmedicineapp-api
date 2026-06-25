@@ -1,20 +1,24 @@
 # syntax=docker/dockerfile:1.7
-FROM golang:1.22.5-bookworm
+FROM golang:1.22.5-bookworm AS build
 
 WORKDIR /app
 
-# cache Go deps separately so they stick
 COPY go.mod go.sum ./
 RUN --mount=type=cache,target=/go/pkg/mod \
     go mod download
 
-# now copy sources
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
-    go build -trimpath -ldflags="-s -w" -o /app/api ./cmd/api
+    CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/api ./cmd/api
 
-COPY ./medslist.json /app/
+FROM scratch
+
+WORKDIR /app
+
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /out/api /app/api
+COPY medslist.json /app/medslist.json
 
 EXPOSE 8080
 

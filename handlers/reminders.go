@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -14,10 +15,14 @@ import (
 type reminderActionRequest struct {
 	ScheduleID string `json:"schedule_id" binding:"required"`
 	DueAt      string `json:"due_at" binding:"required"`
+	DoseAmount string `json:"dose_amount"`
+	DoseUnit   string `json:"dose_unit"`
 }
 
 type reminderNoteRequest struct {
-	Notes string `json:"notes"`
+	Notes      string `json:"notes"`
+	DoseAmount string `json:"dose_amount"`
+	DoseUnit   string `json:"dose_unit"`
 }
 
 type manualNoteRequest struct {
@@ -89,6 +94,12 @@ func UpdateReminderHistoryNotes(g *gin.Context) {
 	}
 
 	log.Notes = req.Notes
+	if req.DoseAmount != "" {
+		log.DoseAmount = req.DoseAmount
+	}
+	if req.DoseUnit != "" {
+		log.DoseUnit = req.DoseUnit
+	}
 	if err := config.Cfg.GormDB.Save(&log).Error; err != nil {
 		g.JSON(http.StatusInternalServerError, gin.H{"error": "could not save notes"})
 		return
@@ -183,8 +194,8 @@ func createReminderLog(g *gin.Context, action string) {
 		UserID:     middleware.UserID(g),
 		MedicineID: medicine.ID,
 		ScheduleID: req.ScheduleID,
-		DoseAmount: medicine.DoseAmount,
-		DoseUnit:   medicine.DoseUnit,
+		DoseAmount: reminderLogDoseValue(req.DoseAmount, medicine.DoseAmount),
+		DoseUnit:   reminderLogDoseValue(req.DoseUnit, medicine.DoseUnit),
 		DueAt:      dueAt,
 		Action:     action,
 	}
@@ -215,4 +226,12 @@ func validateOptionalMedicine(g *gin.Context, medicineID *string) bool {
 		return false
 	}
 	return true
+}
+
+func reminderLogDoseValue(override string, fallback string) string {
+	value := strings.TrimSpace(override)
+	if value == "" {
+		return fallback
+	}
+	return value
 }

@@ -1,0 +1,13 @@
+.git
+.github
+.env
+.env.*
+.DS_Store
+tmp/
+data/
+dist/
+Dockerfile*
+docker-compose*.yml
+*.db
+*.sqlite
+*.sqlite3

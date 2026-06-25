@@ -9,19 +9,17 @@ import (
 
 	logo "log"
 
+	"github.com/glebarez/sqlite"
 	"github.com/jasonbronson/go-gin-boilerplate/library/log"
 	"github.com/joho/godotenv"
-	_ "github.com/newrelic/go-agent/v3/integrations/nrsqlite3"
 	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/xo/dburl"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
 var (
-	Cfg    = &Config{}
-	Driver = "nrsqlite3"
+	Cfg = &Config{}
 )
 
 type Config struct {
