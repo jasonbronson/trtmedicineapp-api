@@ -20,13 +20,15 @@ import (
 )
 
 type medicineRequest struct {
-	Name       string  `json:"name" binding:"required"`
-	DoseAmount string  `json:"dose_amount"`
-	DoseUnit   string  `json:"dose_unit"`
-	Notes      string  `json:"notes"`
-	SoundID    *string `json:"sound_id"`
-	Active     *bool   `json:"active"`
-	Color      string  `json:"color"`
+	Name          string   `json:"name" binding:"required"`
+	DoseAmount    string   `json:"dose_amount"`
+	DoseUnit      string   `json:"dose_unit"`
+	Concentration *string  `json:"concentration"`
+	HalfLifeHours *float64 `json:"half_life_hours"`
+	Notes         string   `json:"notes"`
+	SoundID       *string  `json:"sound_id"`
+	Active        *bool    `json:"active"`
+	Color         string   `json:"color"`
 }
 
 type medListFile struct {
@@ -101,6 +103,8 @@ func CreateMedicine(g *gin.Context) {
 		zap.String("name", req.Name),
 		zap.String("dose_amount", req.DoseAmount),
 		zap.String("dose_unit", req.DoseUnit),
+		zap.Stringp("concentration", req.Concentration),
+		zap.Float64p("half_life_hours", req.HalfLifeHours),
 		zap.String("notes", req.Notes),
 		zap.Stringp("sound_id", req.SoundID),
 		zap.Boolp("active", req.Active),
@@ -110,15 +114,17 @@ func CreateMedicine(g *gin.Context) {
 		active = *req.Active
 	}
 	medicine := models.Medicine{
-		ID:         services.NewID(),
-		UserID:     middleware.UserID(g),
-		Name:       req.Name,
-		DoseAmount: req.DoseAmount,
-		DoseUnit:   req.DoseUnit,
-		Notes:      req.Notes,
-		SoundID:    req.SoundID,
-		Active:     active,
-		Color:      req.Color,
+		ID:            services.NewID(),
+		UserID:        middleware.UserID(g),
+		Name:          req.Name,
+		DoseAmount:    req.DoseAmount,
+		DoseUnit:      req.DoseUnit,
+		Concentration: req.Concentration,
+		HalfLifeHours: req.HalfLifeHours,
+		Notes:         req.Notes,
+		SoundID:       req.SoundID,
+		Active:        active,
+		Color:         req.Color,
 	}
 	if err := config.Cfg.GormDB.Create(&medicine).Error; err != nil {
 		apilog.ZapError("create medicine db failed",
@@ -168,6 +174,8 @@ func UpdateMedicine(g *gin.Context) {
 		zap.String("name", req.Name),
 		zap.String("dose_amount", req.DoseAmount),
 		zap.String("dose_unit", req.DoseUnit),
+		zap.Stringp("concentration", req.Concentration),
+		zap.Float64p("half_life_hours", req.HalfLifeHours),
 		zap.String("notes", req.Notes),
 		zap.Stringp("sound_id", req.SoundID),
 		zap.Boolp("active", req.Active),
@@ -175,6 +183,8 @@ func UpdateMedicine(g *gin.Context) {
 	medicine.Name = req.Name
 	medicine.DoseAmount = req.DoseAmount
 	medicine.DoseUnit = req.DoseUnit
+	medicine.Concentration = req.Concentration
+	medicine.HalfLifeHours = req.HalfLifeHours
 	medicine.Notes = req.Notes
 	medicine.SoundID = req.SoundID
 	medicine.Color = req.Color

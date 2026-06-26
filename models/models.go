@@ -21,19 +21,21 @@ type User struct {
 }
 
 type Medicine struct {
-	ID         string     `gorm:"primaryKey;type:text" json:"id"`
-	UserID     string     `gorm:"index;not null;type:text" json:"user_id"`
-	Name       string     `gorm:"not null;type:text" json:"name"`
-	DoseAmount string     `gorm:"type:text" json:"dose_amount"`
-	DoseUnit   string     `gorm:"type:text" json:"dose_unit"`
-	Notes      string     `gorm:"type:text" json:"notes"`
-	SoundID    *string    `gorm:"type:text" json:"sound_id"`
-	Active     bool       `gorm:"not null;default:true" json:"active"`
-	Color      string     `gorm:"type:text;default:blue" json:"color"`
-	CreatedAt  time.Time  `json:"created_at"`
-	UpdatedAt  time.Time  `json:"updated_at"`
-	DeletedAt  *time.Time `gorm:"index" json:"-"`
-	Schedules  []Schedule `json:"schedules,omitempty"`
+	ID            string     `gorm:"primaryKey;type:text" json:"id"`
+	UserID        string     `gorm:"index;not null;type:text" json:"user_id"`
+	Name          string     `gorm:"not null;type:text" json:"name"`
+	DoseAmount    string     `gorm:"type:text" json:"dose_amount"`
+	DoseUnit      string     `gorm:"type:text" json:"dose_unit"`
+	Concentration *string    `gorm:"type:text" json:"concentration"`
+	HalfLifeHours *float64   `json:"half_life_hours"`
+	Notes         string     `gorm:"type:text" json:"notes"`
+	SoundID       *string    `gorm:"type:text" json:"sound_id"`
+	Active        bool       `gorm:"not null;default:true" json:"active"`
+	Color         string     `gorm:"type:text;default:blue" json:"color"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     time.Time  `json:"updated_at"`
+	DeletedAt     *time.Time `gorm:"index" json:"-"`
+	Schedules     []Schedule `json:"schedules,omitempty"`
 }
 
 type Schedule struct {
